@@ -1,0 +1,59 @@
+# 生产环境配置文件
+# 包含数据库连接、API密钥等敏感信息
+# 注意：这个文件应该加入到 .gitignore 中，不要提交到版本控制
+
+# 应用配置
+app:
+  name: "Daily Brief Generator"
+  version: "1.0.0"
+  port: 8080                        # 生产环境端口
+  mode: "release"                   # 生产模式
+
+# 数据库配置（生产环境使用MySQL）
+database:
+  type: "mysql"                     # 数据库类型
+  dsn: "username:password@tcp(db-host:3306)/daily_brief?charset=utf8mb4&parseTime=True&loc=Local"
+  # 或者使用环境变量：
+  # dsn: "${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/${DB_NAME}?charset=utf8mb4&parseTime=True&loc=Local"
+
+# 飞书配置（生产环境真实配置）
+feishu:
+  enabled: true                     # 启用飞书集成
+  app_id: "cli_a1b2c3d4e5f6g7h8"    # 飞书应用ID
+  app_secret: "secret_key_here"     # 飞书应用密钥
+  webhook_url: "https://open.feishu.cn/open-apis/bot/v2/hook/xxxx"  # Webhook地址
+  chat_id: "oc_1234567890abcdef"    # 群聊ID
+
+# Git配置
+git:
+  scan_interval: "30m"              # 生产环境更频繁扫描
+  max_commits_per_day: 100          # 更高的限制
+  default_branch: "main"
+
+# 日报配置
+report:
+  default_template: "professional"  # 专业模板
+  timezone: "Asia/Shanghai"
+  auto_send: true                   # 自动发送
+  send_time: "18:00"               # 发送时间
+  working_hours:
+    start: "09:00"
+    end: "18:00"
+
+# 日志配置（生产环境）
+logging:
+  level: "info"                     # 生产环境日志级别
+  format: "json"                    # 结构化日志便于分析
+  file: "/var/log/daily-brief/app.log"  # 系统日志路径
+  max_size: 500                     # 更大的日志文件
+  max_age: 90                       # 保留更久
+  max_backups: 30                   # 更多备份
+  compress: true                    # 压缩日志
+
+# Redis配置（生产环境缓存）
+redis:
+  host: "redis-host"
+  port: 6379
+  password: "redis_password"
+  db: 0
+  pool_size: 10 
