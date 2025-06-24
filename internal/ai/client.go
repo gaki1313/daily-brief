@@ -66,62 +66,64 @@ func (c *Client) buildPrompt(commits []storage.Commit, date string, style string
 	var promptBuilder strings.Builder
 
 	// 系统提示
-	promptBuilder.WriteString("你是一个专业的工作日报生成助手。请根据以下Git提交记录和用户提供的工作成果，生成一份结构化的中文工作日报。\n\n")
+	promptBuilder.WriteString("请根据以下信息生成一份自然、简洁的工作日报，语言要像人工写的一样自然，避免过于AI化的表达。\n\n")
 
 	// 要求和格式
-	promptBuilder.WriteString("要求：\n")
-	promptBuilder.WriteString("1. 使用中文回复\n")
-	promptBuilder.WriteString("2. 内容要专业、简洁、有条理\n")
-	promptBuilder.WriteString("3. 突出重要的功能开发、bug修复、性能优化\n")
-	promptBuilder.WriteString("4. 提取业务价值和技术亮点\n")
-	promptBuilder.WriteString("5. 按重要性排序工作项\n")
-	promptBuilder.WriteString("6. 将用户自定义工作成果与Git提交记录相结合\n\n")
+	promptBuilder.WriteString("写作要求：\n")
+	promptBuilder.WriteString("1. 语言自然、简洁，像人写的一样\n")
+	promptBuilder.WriteString("2. 避免过于正式或AI化的表达\n")
+	promptBuilder.WriteString("3. 重点突出，条理清晰\n")
+	promptBuilder.WriteString("4. 直接描述做了什么，不要过度包装\n\n")
 
 	// 输出格式
-	promptBuilder.WriteString("输出格式：\n")
-	promptBuilder.WriteString("# 工作日报 - " + date + "\n\n")
-	promptBuilder.WriteString("## 工作概述\n")
-	promptBuilder.WriteString("[简要总结当天的主要工作内容，包括代码开发和其他工作]\n\n")
-	promptBuilder.WriteString("## 具体工作项\n")
-	promptBuilder.WriteString("### 功能开发\n")
-	promptBuilder.WriteString("- [功能开发相关的工作]\n\n")
-	promptBuilder.WriteString("### Bug修复\n")
-	promptBuilder.WriteString("- [Bug修复相关的工作]\n\n")
-	promptBuilder.WriteString("### 优化改进\n")
-	promptBuilder.WriteString("- [性能优化、代码改进等]\n\n")
-	promptBuilder.WriteString("### 其他工作\n")
-	promptBuilder.WriteString("- [非代码相关的工作成果]\n\n")
-	promptBuilder.WriteString("## 技术亮点\n")
-	promptBuilder.WriteString("- [技术相关的重要改进或创新]\n\n")
-	promptBuilder.WriteString("## 工作量统计\n")
-	promptBuilder.WriteString("- 提交次数：[数量]\n")
-	promptBuilder.WriteString("- 代码变更：+[新增行数] -[删除行数]\n")
-	promptBuilder.WriteString("- 涉及文件：[文件数量]个\n\n")
+	promptBuilder.WriteString("格式示例：\n")
+	promptBuilder.WriteString("# " + date + " 工作日报\n\n")
+	promptBuilder.WriteString("## 今日工作\n")
+	promptBuilder.WriteString("1. [具体做了什么事情]\n")
+	promptBuilder.WriteString("2. [具体做了什么事情]\n\n")
+	promptBuilder.WriteString("## 代码提交\n")
+	promptBuilder.WriteString("- [提交的具体内容，用简单的话描述]\n\n")
+	promptBuilder.WriteString("## 其他\n")
+	promptBuilder.WriteString("- [其他工作内容]\n\n")
 
 	// 用户自定义工作成果
 	if len(workItems) > 0 {
-		promptBuilder.WriteString("用户自定义工作成果：\n")
+		promptBuilder.WriteString("今日完成的工作：\n")
 		for i, item := range workItems {
-			promptBuilder.WriteString(fmt.Sprintf("%d. %s\n", i+1, item))
+			// 移除工作项目开头的数字编号，避免重复编号
+			cleanItem := strings.TrimSpace(item)
+			// 如果以数字开头，移除数字和点号
+			if len(cleanItem) > 0 && cleanItem[0] >= '0' && cleanItem[0] <= '9' {
+				if dotIndex := strings.Index(cleanItem, "."); dotIndex > 0 && dotIndex < 5 {
+					cleanItem = strings.TrimSpace(cleanItem[dotIndex+1:])
+				}
+			}
+			promptBuilder.WriteString(fmt.Sprintf("%d. %s\n", i+1, cleanItem))
 		}
 		promptBuilder.WriteString("\n")
 	}
 
 	// Git提交记录
-	promptBuilder.WriteString("Git提交记录：\n")
+	promptBuilder.WriteString("代码提交记录：\n")
 	if len(commits) == 0 {
-		promptBuilder.WriteString("今日无提交记录\n")
+		promptBuilder.WriteString("今日无代码提交\n")
 	} else {
 		for i, commit := range commits {
 			promptBuilder.WriteString(fmt.Sprintf("%d. %s\n", i+1, commit.Message))
 			if commit.FilesChanged > 0 {
-				promptBuilder.WriteString(fmt.Sprintf("   文件变更：%d个文件，+%d -%d行\n",
+				promptBuilder.WriteString(fmt.Sprintf("   涉及%d个文件，+%d -%d行代码\n",
 					commit.FilesChanged, commit.Additions, commit.Deletions))
 			}
 		}
 	}
 
-	promptBuilder.WriteString("\n请基于以上信息生成专业的工作日报，确保将用户自定义工作成果与Git提交记录有机结合：\n")
+	promptBuilder.WriteString("\n重要要求：\n")
+	promptBuilder.WriteString("1. 必须包含「今日完成的工作」中的所有内容\n")
+	promptBuilder.WriteString("2. 直接描述工作成果，不要提及「用户指定」或类似表述\n")
+	promptBuilder.WriteString("3. 不要包含任何处理过程或元信息的描述\n")
+	promptBuilder.WriteString("4. 语言简洁专业，避免「嗯」「对了」等口语化表达\n")
+	promptBuilder.WriteString("5. 不要添加「重要说明」等额外的解释性段落\n\n")
+	promptBuilder.WriteString("请生成一份简洁专业的工作日报：\n")
 
 	return promptBuilder.String()
 }

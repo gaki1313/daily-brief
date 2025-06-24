@@ -1,0 +1,22 @@
+# Cursor Rules
+
+## Safety Rules
+
+### Process Management
+- **NEVER use `pkill -f main`** - This command will kill ALL programs/processes that contain "main" in their name or command line, which is extremely dangerous and can affect other important system processes.
+- Always use more specific process identification when killing processes:
+  - Use specific process names or PIDs
+  - Use `ps aux | grep <specific_name>` to identify the exact process first
+  - Use full program paths or more precise matching patterns
+  - Use `kill <PID>` to target specific processes
+
+## Development Guidelines
+
+### Go Development
+- This is a Go-based microservices project using distributed architecture
+- Follow Go best practices and conventions
+- Apply code changes automatically when requested
+
+### Project Context
+- This is a daily brief system with GitLab, Feishu, and AI integrations
+- Always consider the impact of changes on the distributed system architecture 

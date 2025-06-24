@@ -1,23 +1,68 @@
 # 日报生成器 (Daily Brief Generator)
 
-一个基于Go语言开发的智能日报生成器，能够自动收集Git提交记录和用户要点，生成专业的工作日报，并通过飞书机器人推送。
+一个基于Go语言开发的智能日报生成器，支持AI增强的内容生成。能够自动收集GitLab提交记录和用户要点，使用AI生成专业的工作日报，并通过飞书机器人自动推送。
+
+## ✨ 最新功能
+
+- 🤖 **AI智能生成**：集成Ollama/OpenAI，AI自动生成自然流畅的工作日报
+- 🔗 **GitLab深度集成**：支持GitLab API v3，智能获取用户提交记录  
+- 📱 **飞书自动推送**：支持Webhook和API两种方式推送到飞书群聊
+- 🎯 **用户要点融合**：自定义工作成果与代码提交智能融合
+- 📊 **多数据源支持**：本地Git + GitLab + 工作要点的综合数据收集
+
+## 🚀 快速体验
+
+### 1. AI日报生成API
+```bash
+# 生成AI增强的GitLab日报并推送到飞书
+curl -X POST http://localhost:3000/api/v1/integrations/feishu/send/ai-gitlab-report \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date": "2025-06-23",
+    "work_items": ["1. 七月绩效制定完成", "2. 代码重构优化"]
+  }'
+```
+
+### 2. 飞书推送功能
+```bash
+# 标准GitLab日报推送（混合数据源）
+curl -X POST http://localhost:3000/api/v1/integrations/feishu/send/report \
+  -H "Content-Type: application/json" \
+  -d '{"date": "2025-06-23", "template": "standard"}'
+
+# 纯GitLab数据日报推送
+curl -X POST http://localhost:3000/api/v1/integrations/feishu/send/gitlab-report \
+  -H "Content-Type: application/json" \
+  -d '{"date": "2025-06-23", "template": "detailed"}'
+```
+
+### 3. GitLab集成状态检查
+```bash
+# 检查GitLab连接状态
+curl http://localhost:3000/api/v1/integrations/gitlab/status
+
+# 获取GitLab用户信息
+curl http://localhost:3000/api/v1/integrations/gitlab/user
+```
 
 ## 🎯 项目目标
 
-- **自动化日报生成**：基于Git提交记录和用户输入要点自动生成日报
-- **多平台集成**：支持飞书等第三方平台推送
-- **模块化设计**：易于扩展和维护的架构
+- **AI智能日报生成**：基于AI技术生成自然流畅的工作日报
+- **GitLab深度集成**：无缝对接GitLab获取真实提交数据
+- **多平台自动推送**：支持飞书等第三方平台自动推送
+- **模块化微服务架构**：易于扩展和维护的分布式设计
 - **学习导向**：通过完备的代码注释帮助Go语言学习
 
 ## 🏗️ 系统架构
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   数据收集层     │    │   处理生成层     │    │   推送集成层     │
+│   数据收集层     │    │   AI生成层      │    │   推送集成层     │
 ├─────────────────┤    ├─────────────────┤    ├─────────────────┤
-│ • Git仓库扫描   │    │ • 模板引擎      │    │ • 飞书机器人     │
-│ • 要点输入      │    │ • 内容生成      │    │ • 邮件推送       │
-│ • 配置管理      │    │ • 格式化处理    │    │ • Webhook       │
+│ • GitLab API    │    │ • Ollama集成    │    │ • 飞书Webhook   │
+│ • 本地Git扫描   │    │ • OpenAI集成    │    │ • 飞书API       │
+│ • 工作要点输入  │    │ • 智能提示词    │    │ • 邮件推送       │
+│ • 配置管理      │    │ • 内容优化      │    │ • 多平台扩展     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          └───────────────────────┼───────────────────────┘
@@ -26,7 +71,7 @@
                     │   存储管理层     │
                     ├─────────────────┤
                     │ • SQLite数据库  │
-                    │ • 配置文件      │
+                    │ • 缓存管理      │
                     │ • 日志管理      │
                     └─────────────────┘
 ```
@@ -35,37 +80,40 @@
 
 ### 1. 核心功能模块
 
-#### 1.1 Git数据收集器 (Git Collector)
-- **功能**：扫描指定Git仓库的提交记录
+#### 1.1 GitLab集成器 (GitLab Integration)
+- **功能**：深度集成GitLab API获取提交记录
 - **特性**：
-  - 支持多仓库扫描
-  - 按日期范围筛选提交
-  - 提取提交信息（作者、时间、消息、文件变更）
-  - 智能分类提交类型（feature、bugfix、refactor等）
+  - 支持GitLab API v3协议
+  - 智能用户身份匹配（邮箱/用户名）
+  - 超优化的分支搜索策略
+  - 按日期范围精确筛选提交
+  - 提取详细提交信息（作者、时间、消息、文件变更）
 
-#### 1.2 要点管理器 (Point Manager)
+#### 1.2 AI日报生成器 (AI Report Generator)
+- **功能**：使用AI技术生成自然流畅的工作日报
+- **特性**：
+  - 集成Ollama本地大模型
+  - 支持OpenAI API
+  - 智能提示词工程
+  - 用户要点与代码提交融合
+  - 专业语言风格控制
+
+#### 1.3 工作要点管理器 (Work Point Manager)
 - **功能**：管理用户手动输入的工作要点
 - **特性**：
   - 分类管理（完成项、进行中、计划项）
   - 优先级设置
-  - 标签系统
+  - 智能分析与标签
   - 历史记录追踪
 
-#### 1.3 日报生成引擎 (Report Generator)
-- **功能**：基于收集的数据生成专业日报
+#### 1.4 飞书推送集成 (Feishu Integration)
+- **功能**：自动推送日报到飞书平台
 - **特性**：
-  - 多种日报模板
-  - 智能内容排序
-  - Markdown/HTML输出
-  - 自定义格式支持
-
-#### 1.4 第三方集成层 (Integration Layer)
-- **功能**：与外部平台集成
-- **特性**：
-  - 飞书机器人集成
-  - Webhook支持
-  - 邮件推送
-  - 可扩展的插件架构
+  - 支持Webhook机器人推送
+  - 支持飞书开放平台API
+  - 多种消息格式（文本、卡片、Markdown）
+  - 自动签名验证
+  - 错误重试机制
 
 ### 2. 辅助功能模块
 
@@ -93,13 +141,15 @@
 - **ORM**：GORM (Go对象关系映射)
 - **配置管理**：Viper (配置文件处理)
 - **日志**：Logrus (结构化日志)
-- **Git操作**：go-git (纯Go实现的Git库)
-- **模板引擎**：text/template + html/template
+- **Git操作**：go-git + GitLab API Client
+- **AI集成**：Ollama + OpenAI API
 - **HTTP客户端**：resty (HTTP请求库)
 
-### 第三方集成
-- **飞书开放平台API**
-- **Git仓库API** (GitHub, GitLab, Gitee等)
+### AI & 第三方集成
+- **AI模型**：Ollama（本地部署）、OpenAI GPT系列
+- **GitLab API**：v3协议，支持自建GitLab实例
+- **飞书开放平台**：Webhook + API双模式
+- **消息推送**：支持多种消息格式和平台扩展
 
 ### 开发工具
 - **构建工具**：Go Modules
@@ -114,27 +164,34 @@ daily-brief/
 ├── cmd/                    # 命令行入口
 │   └── main.go            # 主程序入口
 ├── internal/              # 内部包（不对外暴露）
+│   ├── ai/               # AI集成
+│   │   └── client.go     # AI客户端（Ollama/OpenAI）
 │   ├── config/           # 配置管理
 │   │   ├── config.go     # 配置结构定义
 │   │   └── loader.go     # 配置加载器
-│   ├── collector/        # 数据收集器
-│   │   ├── git.go        # Git数据收集
-│   │   └── points.go     # 要点收集
-│   ├── generator/        # 日报生成器
-│   │   ├── engine.go     # 生成引擎
-│   │   ├── template.go   # 模板管理
-│   │   └── formatter.go  # 格式化处理
-│   ├── integration/      # 第三方集成
-│   │   ├── feishu.go     # 飞书集成
-│   │   └── webhook.go    # Webhook集成
+│   ├── feishu/           # 飞书集成
+│   │   ├── client.go     # 飞书客户端
+│   │   ├── formatter.go  # 消息格式化
+│   │   └── scheduler.go  # 定时推送
+│   ├── git/              # Git操作
+│   │   ├── scanner.go    # 本地Git扫描
+│   │   └── scheduler.go  # Git调度器
+│   ├── gitlab/           # GitLab集成
+│   │   └── client.go     # GitLab API客户端
+│   ├── report/           # 日报生成
+│   │   ├── generator.go  # 日报生成引擎
+│   │   └── templates.go  # 模板系统
+│   ├── server/           # HTTP服务器
+│   │   ├── handlers.go   # 路由处理器
+│   │   ├── middleware.go # 中间件
+│   │   ├── routes.go     # 路由定义
+│   │   └── server.go     # 服务器主体
 │   ├── storage/          # 数据存储
-│   │   ├── models.go     # 数据模型
 │   │   ├── database.go   # 数据库操作
-│   │   └── migration.go  # 数据库迁移
-│   └── server/           # HTTP服务器
-│       ├── handlers.go   # 路由处理器
-│       ├── middleware.go # 中间件
-│       └── routes.go     # 路由定义
+│   │   ├── migration.go  # 数据库迁移
+│   │   └── models.go     # 数据模型
+│   └── workpoint/        # 工作要点管理
+│       └── manager.go    # 要点管理器
 ├── pkg/                   # 公共包（可对外暴露）
 │   ├── logger/           # 日志工具
 │   ├── utils/            # 通用工具
@@ -275,29 +332,42 @@ type DailyReport struct {
 }
 ```
 
-## 🔧 核心API设计
+## 🔧 最新API文档
 
-### 1. 仓库管理
-- `GET /api/repositories` - 获取仓库列表
-- `POST /api/repositories` - 添加新仓库
-- `PUT /api/repositories/:id` - 更新仓库信息
-- `DELETE /api/repositories/:id` - 删除仓库
+### 1. AI日报生成API
+- `POST /api/v1/integrations/feishu/send/ai-gitlab-report` - AI生成GitLab日报并推送飞书
+  ```json
+  {
+    "date": "2025-06-23",
+    "work_items": ["工作成果1", "工作成果2"],
+    "template": "standard",
+    "message_type": "text"
+  }
+  ```
 
-### 2. 要点管理
-- `GET /api/points` - 获取要点列表
-- `POST /api/points` - 创建新要点
-- `PUT /api/points/:id` - 更新要点
-- `DELETE /api/points/:id` - 删除要点
+### 2. 飞书推送API
+- `POST /api/v1/integrations/feishu/send/report` - 标准日报推送（混合数据源）
+- `POST /api/v1/integrations/feishu/send/gitlab-report` - 纯GitLab数据日报推送
+- `GET /api/v1/integrations/feishu/status` - 飞书集成状态
 
-### 3. 日报管理
-- `GET /api/reports` - 获取日报列表
-- `POST /api/reports/generate` - 生成日报
-- `GET /api/reports/:date` - 获取指定日期日报
-- `POST /api/reports/:id/send` - 发送日报
+### 3. GitLab集成API
+- `GET /api/v1/integrations/gitlab/status` - GitLab连接状态
+- `POST /api/v1/integrations/gitlab/test` - 测试GitLab连接
+- `GET /api/v1/integrations/gitlab/user` - 获取GitLab用户信息
+- `GET /api/v1/integrations/gitlab/projects` - 获取GitLab项目列表
+- `GET /api/v1/integrations/gitlab/commits/:date` - 获取指定日期提交记录
 
-### 4. 集成管理
-- `POST /api/integrations/feishu/send` - 发送到飞书
-- `GET /api/integrations/status` - 获取集成状态
+### 4. 工作要点管理API
+- `GET /api/v1/points` - 获取工作要点列表
+- `POST /api/v1/points` - 创建工作要点（带AI分析）
+- `POST /api/v1/points/analyze` - 分析工作要点（不保存）
+- `GET /api/v1/points/analysis` - 获取工作要点和分析信息
+
+### 5. 日报管理API
+- `POST /api/v1/reports/generate` - 生成标准日报
+- `POST /api/v1/reports/gitlab/generate` - 生成GitLab专用日报
+- `GET /api/v1/reports/preview` - 预览日报
+- `GET /api/v1/reports/templates` - 获取可用模板
 
 ## 📝 配置示例
 
@@ -320,12 +390,38 @@ git:
   scan_interval: "1h"
   max_commits_per_day: 50
   
+# GitLab配置
+gitlab:
+  enabled: true
+  base_url: "http://git.infoloop.cn"
+  api_version: "v3"
+  private_token: "your_gitlab_token"
+  username: "your_username"
+  user_email: "your_email@company.com"
+
 # 飞书配置
 feishu:
+  enabled: true
+  webhook_url: "https://open.feishu.cn/open-apis/bot/v2/hook/your_webhook_token"
   app_id: "your_app_id"
   app_secret: "your_app_secret"
-  webhook_url: "your_webhook_url"
+  chat_id: "your_chat_id"
+  sign_secret: "your_sign_secret"
+
+# AI配置
+ai:
   enabled: true
+  provider: "ollama"  # ollama or openai
+  timeout: 30
+  temperature: 0.7
+  max_tokens: 2000
+  # Ollama配置
+  ollama_url: "http://localhost:11434"
+  ollama_model: "deepseek-r1:7b"
+  # OpenAI配置（可选）
+  openai_url: "https://api.openai.com/v1/chat/completions"
+  openai_model: "gpt-3.5-turbo"
+  openai_key: "your_openai_key"
 
 # 日报配置
 report:
@@ -334,6 +430,9 @@ report:
   working_hours:
     start: "09:00"
     end: "18:00"
+  ai:
+    enabled: true
+    style: "enterprise-api"
     
 # 日志配置
 logging:
@@ -404,19 +503,31 @@ logging:
 3. API要有使用示例
 4. 配置项要有说明
 
-## 🎯 扩展计划
+## 🎯 功能现状 & 扩展计划
 
-### 近期扩展
+### ✅ 已实现功能
+1. **AI日报生成**：✅ 集成Ollama和OpenAI，自动生成自然语言日报
+2. **GitLab深度集成**：✅ 支持GitLab API v3，智能提交记录获取
+3. **飞书自动推送**：✅ 支持Webhook和API双模式推送
+4. **多数据源融合**：✅ 用户要点与代码提交智能合并
+5. **专业语言控制**：✅ AI提示词优化，避免AI化表达
+
+### 🚧 进行中功能
+1. **数据可视化**：工作统计图表和效率分析
+2. **调度系统**：定时自动生成和推送
+3. **移动端支持**：PWA应用和移动端适配
+
+### 📋 近期扩展计划
 1. **更多集成平台**：钉钉、企业微信、Slack
-2. **AI增强**：基于AI的日报内容优化
-3. **数据可视化**：工作统计图表
-4. **移动端支持**：PWA应用
+2. **更多AI模型**：支持通义千问、文心一言等
+3. **项目管理集成**：Jira、Trello集成
+4. **团队协作**：多人日报聚合和分析
 
-### 长期规划
-1. **团队协作**：多人日报聚合
-2. **项目管理集成**：Jira、Trello集成
-3. **智能分析**：工作效率分析
-4. **云服务**：SaaS化部署
+### 🔮 长期规划
+1. **智能分析**：基于AI的工作效率分析和建议
+2. **云服务**：SaaS化部署和多租户支持
+3. **企业版**：权限管理、审批流程、合规监控
+4. **插件生态**：开放插件API，支持第三方扩展
 
 ## ✅ 成功指标
 
