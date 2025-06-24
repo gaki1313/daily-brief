@@ -31,6 +31,7 @@ type Database interface {
 	CreateCommit(commit *Commit) error
 	GetCommits(repositoryID uint, date time.Time) ([]Commit, error)
 	GetCommitsByDateRange(start, end time.Time) ([]Commit, error)
+	GetCommitByHash(hash string) (*Commit, error)
 	
 	// 工作要点操作
 	CreateWorkPoint(point *WorkPoint) error
@@ -215,6 +216,19 @@ func (d *database) GetCommitsByDateRange(start, end time.Time) ([]Commit, error)
 		return nil, fmt.Errorf("failed to get commits by date range: %w", err)
 	}
 	return commits, nil
+}
+
+// GetCommitByHash 根据哈希获取提交记录
+func (d *database) GetCommitByHash(hash string) (*Commit, error) {
+	var commit Commit
+	err := d.db.Preload("Repository").
+		Where("hash = ?", hash).
+		First(&commit).Error
+		
+	if err != nil {
+		return nil, fmt.Errorf("failed to get commit by hash: %w", err)
+	}
+	return &commit, nil
 }
 
 // CreateWorkPoint 创建新工作要点

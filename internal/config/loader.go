@@ -14,18 +14,18 @@ import (
 // configFileNames 配置文件名称的优先级列表
 // 按照优先级从高到低排列，程序会依次查找这些文件
 var configFileNames = []string{
-	"config.local",    // 本地开发配置（最高优先级，通常不提交到版本控制）
-	"config.dev",      // 开发环境配置
-	"config.prod",     // 生产环境配置
-	"config",          // 默认配置文件
+	"config.local", // 本地开发配置（最高优先级，通常不提交到版本控制）
+	"config.dev",   // 开发环境配置
+	"config.prod",  // 生产环境配置
+	"config",       // 默认配置文件
 }
 
 // configPaths 配置文件查找路径列表
 // 按照优先级从高到低排列，程序会在这些路径中查找配置文件
 var configPaths = []string{
-	".",              // 当前目录
-	"./configs",      // configs目录
-	"./config",       // config目录
+	".",                // 当前目录
+	"./configs",        // configs目录
+	"./config",         // config目录
 	"/etc/daily-brief", // 系统配置目录
 }
 
@@ -37,31 +37,31 @@ var configPaths = []string{
 // 返回完整的配置对象和可能的错误
 func Load() (*Config, error) {
 	v := viper.New()
-	
+
 	// 第一步：设置默认配置值
 	// 这些默认值确保即使没有配置文件，应用也能正常启动
 	setDefaults(v)
-	
+
 	// 第二步：配置文件查找和加载
 	if err := loadConfigFile(v); err != nil {
 		return nil, fmt.Errorf("failed to load config file: %w", err)
 	}
-	
+
 	// 第三步：配置环境变量支持
 	// 环境变量的优先级高于配置文件
 	setupEnvironmentVariables(v)
-	
+
 	// 第四步：将配置解析到结构体
 	var config Config
 	if err := v.Unmarshal(&config); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
-	
+
 	// 第五步：验证配置的有效性
 	if err := config.Validate(); err != nil {
 		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
-	
+
 	return &config, nil
 }
 
@@ -73,11 +73,11 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("app.version", "1.0.0")
 	v.SetDefault("app.port", 8080)
 	v.SetDefault("app.mode", "release")
-	
+
 	// 数据库配置默认值
 	v.SetDefault("database.type", "sqlite")
 	v.SetDefault("database.path", "./data/daily-brief.db")
-	
+
 	// Git配置默认值
 	v.SetDefault("git.scan_interval", "1h")
 	v.SetDefault("git.max_commits_per_day", 50)
@@ -85,14 +85,14 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("git.exclude_patterns", []string{
 		"*.log", "*.tmp", "node_modules/*", ".git/*",
 	})
-	
+
 	// 飞书配置默认值
 	v.SetDefault("feishu.enabled", false)
 	v.SetDefault("feishu.app_id", "")
 	v.SetDefault("feishu.app_secret", "")
 	v.SetDefault("feishu.webhook_url", "")
 	v.SetDefault("feishu.chat_id", "")
-	
+
 	// 日报配置默认值
 	v.SetDefault("report.default_template", "standard")
 	v.SetDefault("report.timezone", "Asia/Shanghai")
@@ -100,7 +100,17 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("report.working_hours.end", "18:00")
 	v.SetDefault("report.auto_send", false)
 	v.SetDefault("report.send_time", "18:30")
-	
+
+	// AI配置默认值
+	v.SetDefault("report.ai.enabled", false)
+	v.SetDefault("report.ai.provider", "ollama")
+	v.SetDefault("report.ai.ollama_url", "http://localhost:11434")
+	v.SetDefault("report.ai.ollama_model", "deepseek-r1:7b")
+	v.SetDefault("report.ai.openai_model", "gpt-3.5-turbo")
+	v.SetDefault("report.ai.temperature", 0.7)
+	v.SetDefault("report.ai.max_tokens", 2000)
+	v.SetDefault("report.ai.timeout", 60)
+
 	// 日志配置默认值
 	v.SetDefault("logging.level", "info")
 	v.SetDefault("logging.format", "json")
@@ -116,7 +126,7 @@ func setDefaults(v *viper.Viper) {
 func loadConfigFile(v *viper.Viper) error {
 	// 设置配置文件格式
 	v.SetConfigType("yaml")
-	
+
 	// 首先尝试从环境变量获取配置文件路径
 	if configFile := os.Getenv("CONFIG_FILE"); configFile != "" {
 		v.SetConfigFile(configFile)
@@ -126,15 +136,15 @@ func loadConfigFile(v *viper.Viper) error {
 		fmt.Printf("Using config file: %s\n", v.ConfigFileUsed())
 		return nil
 	}
-	
+
 	// 在指定路径中查找配置文件
 	var configFound bool
 	var lastErr error
-	
+
 	for _, path := range configPaths {
 		for _, name := range configFileNames {
 			configFile := filepath.Join(path, name+".yaml")
-			
+
 			// 检查文件是否存在
 			if _, err := os.Stat(configFile); os.IsNotExist(err) {
 				// 尝试.yml扩展名
@@ -143,30 +153,30 @@ func loadConfigFile(v *viper.Viper) error {
 					continue
 				}
 			}
-			
+
 			// 尝试加载配置文件
 			v.SetConfigFile(configFile)
 			if err := v.ReadInConfig(); err != nil {
 				lastErr = err
 				continue
 			}
-			
+
 			fmt.Printf("Using config file: %s\n", v.ConfigFileUsed())
 			configFound = true
 			break
 		}
-		
+
 		if configFound {
 			break
 		}
 	}
-	
+
 	// 如果没有找到任何配置文件，使用默认配置
 	if !configFound {
 		fmt.Println("No config file found, using default configuration")
 		return nil
 	}
-	
+
 	return lastErr
 }
 
@@ -175,14 +185,14 @@ func loadConfigFile(v *viper.Viper) error {
 func setupEnvironmentVariables(v *viper.Viper) {
 	// 设置环境变量前缀
 	v.SetEnvPrefix("DAILY_BRIEF")
-	
+
 	// 设置环境变量key的分隔符
 	// 例如：DAILY_BRIEF_APP_PORT 对应配置项 app.port
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	
+
 	// 自动读取环境变量
 	v.AutomaticEnv()
-	
+
 	// 手动绑定一些重要的环境变量
 	envBindings := map[string]string{
 		"app.port":           "PORT",
@@ -194,7 +204,7 @@ func setupEnvironmentVariables(v *viper.Viper) {
 		"logging.level":      "LOG_LEVEL",
 		"logging.file":       "LOG_FILE",
 	}
-	
+
 	for configKey, envKey := range envBindings {
 		if err := v.BindEnv(configKey, envKey); err != nil {
 			// 绑定失败不是致命错误，记录但继续执行
@@ -208,11 +218,11 @@ func setupEnvironmentVariables(v *viper.Viper) {
 func GetConfigPath() string {
 	v := viper.New()
 	setupEnvironmentVariables(v)
-	
+
 	if err := loadConfigFile(v); err != nil {
 		return "default configuration (no file)"
 	}
-	
+
 	return v.ConfigFileUsed()
 }
 
@@ -228,10 +238,10 @@ func SaveConfig(config *Config, filename string) error {
 	v := viper.New()
 	v.SetConfigType("yaml")
 	v.SetConfigFile(filename)
-	
+
 	// 将配置结构体转换为map
 	configMap := make(map[string]interface{})
-	
+
 	// 应用配置
 	configMap["app"] = map[string]interface{}{
 		"name":    config.App.Name,
@@ -239,13 +249,13 @@ func SaveConfig(config *Config, filename string) error {
 		"port":    config.App.Port,
 		"mode":    config.App.Mode,
 	}
-	
+
 	// 数据库配置
 	configMap["database"] = map[string]interface{}{
 		"type": config.Database.Type,
 		"path": config.Database.Path,
 	}
-	
+
 	// Git配置
 	configMap["git"] = map[string]interface{}{
 		"scan_interval":       config.Git.ScanInterval,
@@ -253,7 +263,7 @@ func SaveConfig(config *Config, filename string) error {
 		"default_branch":      config.Git.DefaultBranch,
 		"exclude_patterns":    config.Git.ExcludePatterns,
 	}
-	
+
 	// 飞书配置
 	configMap["feishu"] = map[string]interface{}{
 		"app_id":      config.Feishu.AppID,
@@ -262,7 +272,7 @@ func SaveConfig(config *Config, filename string) error {
 		"enabled":     config.Feishu.Enabled,
 		"chat_id":     config.Feishu.ChatID,
 	}
-	
+
 	// 日报配置
 	configMap["report"] = map[string]interface{}{
 		"default_template": config.Report.DefaultTemplate,
@@ -274,7 +284,7 @@ func SaveConfig(config *Config, filename string) error {
 			"end":   config.Report.WorkingHours.End,
 		},
 	}
-	
+
 	// 日志配置
 	configMap["logging"] = map[string]interface{}{
 		"level":       config.Logging.Level,
@@ -285,21 +295,21 @@ func SaveConfig(config *Config, filename string) error {
 		"max_backups": config.Logging.MaxBackups,
 		"compress":    config.Logging.Compress,
 	}
-	
+
 	// 合并配置
 	for key, value := range configMap {
 		v.Set(key, value)
 	}
-	
+
 	// 确保目录存在
 	if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
-	
+
 	// 写入配置文件
 	if err := v.WriteConfig(); err != nil {
 		return fmt.Errorf("failed to write config file: %w", err)
 	}
-	
+
 	return nil
-} 
+}

@@ -21,11 +21,33 @@ data/
 logs/
 *.log
 
-# 配置文件（本地配置）
+# 配置文件（本地配置和敏感配置）
 config.local.*
 config.dev.*
+config.prod.*
+config.test.*
+configs/config.yaml
+configs/config.local.*
+configs/config.dev.*
+configs/config.prod.*
+configs/config.test.*
 .env
 .env.local
+.env.dev
+.env.prod
+.env.test
+
+# 保留示例配置文件（可以提交）
+!configs/config.example.yaml
+
+# 敏感信息文件
+*.key
+*.pem
+*.p12
+*.crt
+*.csr
+secrets/
+credentials/
 
 # IDE相关
 .vscode/
@@ -57,8 +79,54 @@ temp/
 /bin/
 /build/
 /dist/
+main
+daily-brief
+daily-brief.exe
 
 # 测试覆盖率
 coverage.txt
 coverage.out
-*.cover 
+*.cover
+
+# 项目特定文件
+# 编译后的可执行文件
+main
+daily-brief
+daily-brief.exe
+
+# 运行时生成的文件
+test_request.json
+*.request.json
+
+# 脚本生成的token文件
+gitlab_token.txt
+*.token
+
+# AI模型缓存
+.ollama/
+models/
+
+# 飞书webhook测试文件
+webhook_test.json
+feishu_test.json
+
+# 本地开发配置（保留示例配置）
+# 注意：config.yaml 作为示例配置应该被提交
+# 但是包含真实密钥的配置文件应该被忽略
+
+# 项目特定文件
+# 运行时生成的文件
+test_request.json
+*.request.json
+
+# 脚本生成的token文件
+gitlab_token.txt
+*.token
+
+# AI模型缓存
+.ollama/
+models/
+
+# 飞书webhook测试文件
+webhook_test.json
+feishu_test.json 

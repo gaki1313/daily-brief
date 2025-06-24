@@ -1,0 +1,94 @@
+# 配置文件示例 - 复制此文件为 config.yaml 并填入真实配置
+# 这是项目的基础配置模板，包含了所有模块的默认设置
+
+# 应用基础配置
+app:
+  name: "Daily Brief Generator"     # 应用名称
+  version: "1.0.0"                  # 应用版本
+  port: 3000                        # HTTP服务端口（开发环境用3000）
+  mode: "debug"                     # 运行模式：debug（开发）/release（生产）
+
+# 数据库配置
+database:
+  type: "sqlite"                    # 数据库类型：sqlite（开发简单）
+  path: "./data/daily-brief.db"     # SQLite数据库文件路径
+
+# Git配置
+git:
+  scan_interval: "30m"              # Git扫描间隔（开发环境更频繁）
+  max_commits_per_day: 50           # 每日最大提交数量限制
+  default_branch: "main"            # 默认分支名
+  exclude_patterns:                 # 排除的文件模式
+    - "*.log"
+    - "*.tmp"
+    - "node_modules/*"
+    - ".git/*"
+    - "vendor/*"
+    - "*.pyc"
+    - "__pycache__/*"
+    - "*.class"
+    - "target/*"
+    - "build/*"
+    - "dist/*"
+  # GitLab集成配置
+  gitlab:
+    enabled: true                           # 启用GitLab集成
+    base_url: "http://your-gitlab-url"      # GitLab服务器地址
+    username: "your-username"               # GitLab用户名（可选）
+    password: ""                            # GitLab密码（不推荐）
+    token: ""                               # Personal Access Token（推荐）
+    project_ids: []                         # 指定项目ID列表，空表示所有项目
+
+# 飞书配置（Webhook模式）
+feishu:
+  enabled: true                     # 启用飞书集成
+  app_id: ""                        # 飞书应用ID（Webhook模式不需要）
+  app_secret: ""                    # 飞书应用密钥（Webhook模式不需要）
+  webhook_url: ""                   # 飞书机器人Webhook地址
+  chat_id: ""                       # 群聊ID（Webhook模式不需要）
+
+# 日报配置
+report:
+  default_template: "standard"      # 默认模板名称
+  timezone: "Asia/Shanghai"         # 时区设置
+  auto_send: false                  # 是否自动发送（开发环境关闭）
+  send_time: "18:00"               # 自动发送时间
+  working_hours:                    # 工作时间配置
+    start: "09:00"                  # 工作开始时间
+    end: "18:00"                    # 工作结束时间
+  # AI智能生成配置
+  ai:
+    enabled: true                   # 是否启用AI生成
+    provider: "ollama"              # AI提供商: ollama, openai, gemini, qwen
+    
+    # Ollama配置 (推荐，免费本地运行)
+    ollama_url: "http://localhost:11434"    # Ollama服务地址
+    ollama_model: "deepseek-r1:7b"          # 使用的模型
+    
+    # OpenAI配置 (可选)
+    openai_key: ""                  # OpenAI API Key
+    openai_model: "gpt-3.5-turbo"   # OpenAI模型
+    openai_url: ""                  # OpenAI API URL (可选，支持代理)
+    
+    # Gemini配置 (可选)
+    gemini_key: ""                  # Gemini API Key
+    gemini_model: "gemini-pro"      # Gemini模型
+    
+    # 通义千问配置 (可选)
+    qwen_key: ""                    # 通义千问API Key
+    qwen_model: "qwen-turbo"        # 通义千问模型
+    
+    # 通用配置
+    temperature: 0.7                # 生成温度 (0.0-1.0)
+    max_tokens: 2000                # 最大token数
+    timeout: 60                     # 请求超时时间(秒)
+
+# 日志配置（开发环境友好）
+logging:
+  level: "debug"                    # 日志级别：debug（开发详细日志）
+  format: "text"                    # 日志格式：text（开发易读）/json（生产结构化）
+  file: "./logs/app.log"           # 日志文件路径
+  max_size: 50                      # 单个日志文件最大大小(MB)
+  max_age: 7                        # 日志文件保留天数
+  max_backups: 5                    # 最大备份文件数量
+  compress: false                   # 是否压缩旧日志文件（开发环境不压缩） 

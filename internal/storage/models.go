@@ -78,15 +78,18 @@ type DailyReport struct {
 // IntegrationLog 代表集成操作日志
 // 记录与第三方平台的交互日志
 type IntegrationLog struct {
-	ID         uint      `gorm:"primaryKey" json:"id"`                    // 主键ID
-	Platform   string    `gorm:"not null;size:50;index" json:"platform"` // 平台名称
-	Action     string    `gorm:"not null;size:100" json:"action"`         // 操作类型
-	Status     string    `gorm:"not null;size:50" json:"status"`          // 操作状态
-	Request    string    `gorm:"type:text" json:"request"`                // 请求内容
-	Response   string    `gorm:"type:text" json:"response"`               // 响应内容
-	Error      string    `gorm:"type:text" json:"error"`                  // 错误信息
-	Duration   int64     `gorm:"default:0" json:"duration"`               // 耗时(毫秒)
-	CreatedAt  time.Time `json:"created_at"`                              // 创建时间
+	ID          uint      `gorm:"primaryKey" json:"id"`                    // 主键ID
+	Platform    string    `gorm:"not null;size:50;index" json:"platform"` // 平台名称
+	Action      string    `gorm:"not null;size:100" json:"action"`         // 操作类型
+	Status      string    `gorm:"not null;size:50" json:"status"`          // 操作状态
+	ReceiveID   string    `gorm:"size:255" json:"receive_id"`              // 接收者ID
+	MessageType string    `gorm:"size:50" json:"message_type"`             // 消息类型
+	MessageID   string    `gorm:"size:255" json:"message_id"`              // 消息ID
+	Request     string    `gorm:"type:text" json:"request"`                // 请求内容
+	Response    string    `gorm:"type:text" json:"response"`               // 响应内容
+	Error       string    `gorm:"type:text" json:"error"`                  // 错误信息
+	Duration    int64     `gorm:"default:0" json:"duration"`               // 耗时(毫秒)
+	CreatedAt   time.Time `json:"created_at"`                              // 创建时间
 }
 
 // BeforeCreate GORM钩子，在创建记录前执行

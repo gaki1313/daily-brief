@@ -68,6 +68,12 @@ func main() {
 	// 创建路由和中间件
 	srv := server.New(cfg, db, log)
 	
+	// 第六点五步：启动后台服务（Git调度器等）
+	if err := srv.StartServices(); err != nil {
+		log.Fatalf("Failed to start background services: %v", err)
+	}
+	log.Info("Background services started successfully")
+	
 	// 第七步：配置HTTP服务器参数
 	httpServer := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.App.Port),
@@ -107,6 +113,13 @@ func main() {
 		log.Errorf("HTTP server forced to shutdown: %v", err)
 	} else {
 		log.Info("HTTP server shutdown gracefully")
+	}
+
+	// 第十点五步：停止后台服务
+	if err := srv.StopServices(); err != nil {
+		log.Errorf("Failed to stop background services: %v", err)
+	} else {
+		log.Info("Background services stopped gracefully")
 	}
 
 	// 第十一步：关闭数据库连接
